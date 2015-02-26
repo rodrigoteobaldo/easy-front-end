@@ -1,5 +1,6 @@
 {
   "name": "easy-front-end",
+  "repository": "https://github.com/rodrigoteobaldo/easy-front-end",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,9 +10,12 @@
   "author": "Rodrigo Teobaldo",
   "license": "MIT",
   "devDependencies": {
+    "browser-sync": "^2.2.1",
     "gulp": "^3.8.11",
     "gulp-closure-compiler": "^0.2.16",
     "gulp-imagemin": "^2.2.0",
+    "gulp-include": "^1.1.1",
+    "gulp-rev": "^3.0.1",
     "gulp-stylus": "^2.0.1"
   },
   "dependencies": {}
