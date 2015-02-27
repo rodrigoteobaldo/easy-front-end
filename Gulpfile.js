@@ -1,3 +1,5 @@
+'use strict';
+
 var gulp = require('gulp');
 var closureCompiler = require('gulp-closure-compiler');
 var stylus = require('gulp-stylus');
@@ -9,13 +11,13 @@ var ASSETS_PATH = './app/assets/';
 gulp.task('stylus', function () {
   return gulp.src(ASSETS_PATH + 'stylesheets/*.styl')
   .pipe(stylus())
-  .pipe(gulp.dest('./dist/stylesheets/'));
+  .pipe(gulp.dest('dist/stylesheets/'));
 });
 
 gulp.task('jsConcat', function () {
   return gulp.src(ASSETS_PATH + 'scripts/application.js')
   .pipe(include())
-  .pipe(gulp.dest('./dist/scripts/'));
+  .pipe(gulp.dest('dist/scripts/'));
 });
 
 gulp.task('jsCompile', function () {
@@ -25,13 +27,16 @@ gulp.task('jsCompile', function () {
     compilerPath: 'bower_components/closure-compiler/compiler.jar',
     fileName: 'application.min.js'
   }))
-  .pipe(gulp.dest('./dist/scripts/'));
+  .pipe(gulp.dest('dist/scripts/'));
 });
 
 gulp.task('browserSync', function() {
   browserSync({
     server: {
-      baseDir: "./dist/"
+      baseDir: ['dist', './']
+    },
+    routes: {
+      '/bower_components': 'bower_components'
     }
   });
 
@@ -41,9 +46,13 @@ gulp.task('browserSync', function() {
 });
 
 gulp.task('copyFiles', function () {
-  return gulp.src('app/*.*')
-  .pipe(gulp.src('app/pages/*.*'))
-  .pipe(gulp.dest('./dist/'));
+  return gulp.src([
+    'app/*.*',
+    'app/pages/*.html',
+    'app/fonts/'
+  ], {
+    dot: true
+  }).pipe(gulp.dest('dist'));
 });
 
 gulp.task('serve', ['stylus', 'jsConcat', 'copyFiles', 'browserSync']);
