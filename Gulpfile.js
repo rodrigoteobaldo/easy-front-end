@@ -1,29 +1,73 @@
+/*jslint node: true */
 'use strict';
 
 var gulp = require('gulp');
-var closureCompiler = require('gulp-closure-compiler');
-var stylus = require('gulp-stylus');
+var $ = require('gulp-load-plugins')();
 var browserSync = require('browser-sync');
-var include = require('gulp-include');
+var nib = require('nib');
 
 var ASSETS_PATH = './app/assets/';
+var BOWER_PATH = './bower_components/';
+
+gulp.task('compressImages', function () {
+  return gulp.src(ASSETS_PATH + 'images/**/*')
+    .pipe($.imagemin({
+      progressive: true,
+      interlaced: true,
+      svgoPlugins: [{cleanupIDs: false}]
+    }))
+    .pipe(gulp.dest('dist/images'));
+});
+
+gulp.task('minifyHtml', function () {
+  var options = {
+    conditionals: true
+  };
+
+  return gulp.src('dist/')
+  .pipe($.minifyHtml(options))
+  .pipe(gulp.dest('dist/'));
+});
+
+gulp.task('templates', function () {
+  var options = {
+    ignorePartials: true,
+    batch : ['./app/partials']
+  };
+
+  return gulp.src('app/pages/*.html')
+  .pipe($.compileHandlebars(null, options))
+  .pipe($.rename(function(path) {
+    path.extname = '.html';
+  }))
+  .pipe(gulp.dest('dist'));
+});
 
 gulp.task('stylus', function () {
   return gulp.src(ASSETS_PATH + 'stylesheets/*.styl')
-  .pipe(stylus())
+  .pipe($.stylus({ use: nib() }))
   .pipe(gulp.dest('dist/stylesheets/'));
 });
 
-gulp.task('jsConcat', function () {
-  return gulp.src(ASSETS_PATH + 'scripts/application.js')
-  .pipe(include())
+gulp.task('jsConcat:application', function () {
+  return gulp.src(ASSETS_PATH + 'scripts/**/*.js')
+  .pipe($.concat('application.js', {newLine: ';'}))
+  .pipe(gulp.dest('dist/scripts/'));
+});
+
+gulp.task('jsConcat:vendor', function () {
+  return gulp.src([
+    BOWER_PATH + 'jquery/dist/jquery.js',
+    BOWER_PATH + 'swiper/dist/js/swiper.js',
+  ])
+  .pipe($.concat('vendor.js', {newLine: ';\n'}))
   .pipe(gulp.dest('dist/scripts/'));
 });
 
 gulp.task('jsCompile', function () {
   return gulp.src(ASSETS_PATH + 'scripts/application.js')
-  .pipe(include())
-  .pipe(closureCompiler({
+  .pipe($.include())
+  .pipe($.closureCompiler({
     compilerPath: 'bower_components/closure-compiler/compiler.jar',
     fileName: 'application.min.js'
   }))
@@ -41,20 +85,45 @@ gulp.task('browserSync', function() {
   });
 
   gulp.watch("app/assets/stylesheets/**/*.styl", ['stylus']);
-  gulp.watch("app/assets/scripts/**/*.js", ['jsConcat']);
-  gulp.watch("app/**/*.html", ['copyFiles']).on('change', browserSync.reload);
+  gulp.watch("app/assets/scripts/**/*.js", ['jsConcat:vendor', 'jsConcat:application']);
+  gulp.watch("app/**/*.html", ['copyExtras']).on('change', browserSync.reload);
 });
 
-gulp.task('copyFiles', function () {
+gulp.task('copyExtras', function () {
   return gulp.src([
     'app/*.*',
-    'app/pages/*.html',
     'app/fonts/'
   ], {
     dot: true
   }).pipe(gulp.dest('dist'));
 });
 
-gulp.task('serve', ['stylus', 'jsConcat', 'copyFiles', 'browserSync']);
+gulp.task('copyHtml', function () {
+  return gulp.src([
+    'app/pages/*'
+  ], {
+    dot: true
+  }).pipe(gulp.dest('dist'));
+});
+
+gulp.task('clean', require('del').bind(null, ['dist']));
+
+gulp.task('serve', [
+  'stylus',
+  'jsConcat:vendor',
+  'jsConcat:application',
+  'copyHtml',
+  'copyExtras',
+  'browserSync'
+]);
 
 gulp.task('default', ['serve']);
+
+gulp.task('build', [
+  'clean',
+  'stylus',
+  'wiredep',
+  'compressImages',
+  'minifyHtml',
+  'copyExtras'
+]);
