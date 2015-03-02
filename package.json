@@ -23,6 +23,8 @@
     "gulp-rename": "^1.2.0",
     "gulp-rev": "^3.0.1",
     "gulp-stylus": "^2.0.1",
+    "gulp-usemin": "^0.3.11",
+    "jeet": "^6.1.2",
     "nib": "^1.1.0"
   },
   "dependencies": {}

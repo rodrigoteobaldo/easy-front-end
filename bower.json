@@ -16,8 +16,9 @@
   ],
   "dependencies": {
     "jquery": "~2.1.3",
-    "swiper": "~3.0.2",
-    "closure-compiler": "http://dl.google.com/closure-compiler/compiler-latest.zip"
+    "swiper": "~3.0.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "closure-compiler": "~0.2.6"
+  }
 }
