@@ -18,4 +18,4 @@
 
 # Exclude the `.htaccess` file from GitHub's language statistics
 # https://github.com/github/linguist#using-gitattributes
-dist/.htaccess linguist-vendored
+app/.htaccess linguist-vendored
