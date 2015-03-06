@@ -4,16 +4,19 @@ em($px, $base = $base-font-size) {
 }
 
 // Transforma 'px' em 'rem' adicionando também fallback para browsers antigos
-rem($px, fallback = true) {
-  font-size: value;
+rem($px, fallback = false) {
 
-  if (value is inherit) {
+  if (fallback) {
+    font-size: $px;
+  }
+
+  if ($px is inherit) {
     /* do nothing, "inherit" has no unit */
   } else {
     u = unit($px);
 
     if (u is 'px') {
-      font-size: unit($px/16, 'rem');
+      font-size: unit($px/unit($base-font-size, 'px'), 'rem');
     } else {
       font-size: unit($px, u);
     }

@@ -46,7 +46,10 @@ gulp.task('templates', function () {
 
 gulp.task('stylus', function () {
   return gulp.src(ASSETS_PATH + 'stylesheets/*.styl')
-  .pipe($.stylus({ use: [nib(), jeet()] }))
+  .pipe($.stylus({ use: [nib(), jeet()] }).on('error', function(err) {
+    console.log(err.stack);
+    this.emit('end');
+  }))
   .pipe(gulp.dest('dist/stylesheets/'));
 });
 

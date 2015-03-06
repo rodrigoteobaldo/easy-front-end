@@ -2,6 +2,8 @@
 
 Framework front-end com workflow simplificado.
 
+**IE9+ ready.**
+
 ## Instalação
 
 Você precisa ter instalado o *Node.js*. Caso não tenha, baixe [aqui](http://nodejs.org/).
