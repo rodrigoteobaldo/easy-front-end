@@ -68,11 +68,11 @@ gulp.task('usemin', function () {
 });
 
 gulp.task('build:jsCompile', function () {
-  return gulp.src(ASSETS_PATH + 'scripts/application.js')
+  return gulp.src(ASSETS_PATH + 'scripts/all.js')
   .pipe($.include())
   .pipe($.closureCompiler({
     compilerPath: 'bower_components/closure-compiler/compiler.jar',
-    fileName: 'application.min.js'
+    fileName: 'all.min.js'
   }))
   .pipe(gulp.dest('dist/scripts/'));
 });

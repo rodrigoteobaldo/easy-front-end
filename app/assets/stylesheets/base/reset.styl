@@ -22,13 +22,17 @@ time, mark, audio, video {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	font-size: unit($base-font-size, 'px');
 	font: inherit;
 	vertical-align: baseline;
 }
+
+html { font-size: unit($base-font-size, 'px'); }
+
 body {
 	line-height: 1;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 ol, ul {
 	list-style: none;

@@ -13,7 +13,7 @@ rem($px, fallback = false) {
   if ($px is inherit) {
     /* do nothing, "inherit" has no unit */
   } else {
-    u = unit($px);
+    var u = unit($px);
 
     if (u is 'px') {
       font-size: unit($px/unit($base-font-size, 'px'), 'rem');
