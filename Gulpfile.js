@@ -55,7 +55,7 @@ gulp.task('stylus', function () {
     console.log(err.stack);
     this.emit('end');
   }))
-  .pipe(gulp.dest(STYLESHEETS_PATH));
+  .pipe(gulp.dest(DIST_PATH + 'stylesheets'));
 });
 
 gulp.task('usemin', function () {
@@ -73,12 +73,13 @@ gulp.task('usemin', function () {
 });
 
 gulp.task('build:jsCompile', function () {
+  var options = {
+
+  };
+
   return gulp.src(JS_PATH + 'all.js')
   .pipe($.include())
-  .pipe($.closureCompiler({
-    compilerPath: VENDOR_PATH + 'closure-compiler/compiler.jar',
-    fileName: 'all.min.js'
-  }))
+  .pipe($.uglify(options))
   .pipe(gulp.dest(DIST_PATH + 'scripts/'));
 });
 
