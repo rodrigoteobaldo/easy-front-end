@@ -19,3 +19,5 @@
 # Exclude the `.htaccess` file from GitHub's language statistics
 # https://github.com/github/linguist#using-gitattributes
 app/.htaccess linguist-vendored
+
+CONTRIBUTING.md export-ignore
