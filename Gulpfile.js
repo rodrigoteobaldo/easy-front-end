@@ -60,6 +60,15 @@ gulp.task('images', function () {
     .pipe($.size({title: 'images'}));
 });
 
+// Optimize images
+gulp.task('svgo', function () {
+  return gulp.src('app/assets/images/**/*.svg')
+    .pipe($.imageminSvgo())
+    .pipe($.svgstore())
+    .pipe(gulp.dest('dist/images'))
+    .pipe($.size({title: 'svg'}));
+});
+
 // Copy all files at the root level (app)
 gulp.task('copy', function () {
   return gulp.src([
@@ -83,9 +92,8 @@ gulp.task('fonts', function () {
 gulp.task('styles', function () {
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/assets/styles/*.scss',
-    'app/assets/styles/**/*.css',
-    'app/assets/styles/components/components.scss'
+    'app/assets/styles/**/*.scss',
+    'app/assets/styles/**/*.css'
   ])
     .pipe($.sourcemaps.init())
     .pipe($.changed('.tmp/styles', {extension: '.css'}))
