@@ -26,4 +26,12 @@ npm install -g bower gulp
 
 (Caso qualquer um desses comandos não estiverem disponíveis no terminal/cmd, vide [Instalação](#instalacao))
 
-4 - utilize o comando `gulp` para iniciar o servidor;
+4 - utilize o comando `gulp serve` para iniciar o servidor;
+
+
+## TODO
+- [ ] Corrigir bug onde o arquivo pai de Sass nao recompila quando o filho é alterado (bug do Jerry);
+- [ ] Adicionar load de css em arquivo Sass;
+- [ ] Suporte a sprites SVG;
+- [ ] Otimização de SVG;
+- [ ] Suporte a HTML partials;

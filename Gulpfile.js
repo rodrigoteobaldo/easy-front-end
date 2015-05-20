@@ -92,12 +92,13 @@ gulp.task('fonts', function () {
 gulp.task('styles', function () {
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/assets/styles/**/*.scss',
+    'app/assets/styles/*.scss',
     'app/assets/styles/**/*.css'
   ])
     .pipe($.sourcemaps.init())
     .pipe($.changed('.tmp/styles', {extension: '.css'}))
     .pipe($.sass({
+      includePath: 'bower_components',
       precision: 10,
       onError: console.error.bind(console, 'Sass error:')
     }))
