@@ -30,7 +30,7 @@ npm install -g bower gulp
 
 
 ## TODO
-- [ ] Corrigir bug onde o arquivo pai de Sass nao recompila quando o filho é alterado (bug do Jerry);
+- [x] Corrigir bug onde o arquivo pai de Sass nao recompila quando o filho é alterado (bug do Jerry);
 - [ ] Adicionar load de css em arquivo Sass;
 - [ ] Suporte a sprites SVG;
 - [ ] Otimização de SVG;

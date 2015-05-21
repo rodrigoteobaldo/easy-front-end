@@ -1,7 +1,6 @@
 /**
  *
- *  Web Starter Kit
- *  Copyright 2014 Google Inc. All rights reserved.
+ *  Front End Starter Kit
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -26,7 +25,6 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var pagespeed = require('psi');
-var reload = browserSync.reload;
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -46,7 +44,8 @@ gulp.task('jshint', function () {
     .pipe(reload({stream: true, once: true}))
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
-    .pipe($.if(!browserSync.active, $.jshint.reporter('fail')));
+    .pipe($.if(!browserSync.active, $.jshint.reporter('fail')))
+    .pipe(browserSync.stream());
 });
 
 // Optimize images
@@ -92,22 +91,22 @@ gulp.task('fonts', function () {
 gulp.task('styles', function () {
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
-    'app/assets/styles/*.scss',
+    'app/assets/styles/*.{scss,sass}',
     'app/assets/styles/**/*.css'
   ])
     .pipe($.sourcemaps.init())
-    .pipe($.changed('.tmp/styles', {extension: '.css'}))
+    .pipe($.changed('.tmp/styles'))
     .pipe($.sass({
-      includePath: 'bower_components',
+      includePath: ['bower_components'],
       precision: 10,
-      onError: console.error.bind(console, 'Sass error:')
-    }))
+    }).on('error', $.sass.logError))
     .pipe($.autoprefixer({browsers: AUTOPREFIXER_BROWSERS}))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
     // Concatenate and minify styles
     .pipe($.if('*.css', $.csso()))
     .pipe(gulp.dest('dist/styles'))
+    .pipe(browserSync.stream())
     .pipe($.size({title: 'styles'}));
 });
 
@@ -160,13 +159,13 @@ gulp.task('serve', ['styles'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: ['.tmp', 'app']
+    server: ['.tmp', 'app', 'app/assets']
   });
 
-  gulp.watch(['app/**/*.html'], reload);
-  gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles', reload]);
+  gulp.watch(['app/**/*.html']).on('change', browserSync.reload);
+  gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
   gulp.watch(['app/assets/scripts/**/*.js'], ['jshint']);
-  gulp.watch(['app/assets/images/**/*'], reload);
+  gulp.watch(['app/assets/images/**/*']).on('change', browserSync.reload);
 });
 
 // Build and serve the output from the dist build
