@@ -35,3 +35,4 @@ npm install -g bower gulp
 - [ ] Suporte a sprites SVG;
 - [ ] Otimização de SVG;
 - [ ] Suporte a HTML partials;
+- [ ] Suporte a imagens WebP;
