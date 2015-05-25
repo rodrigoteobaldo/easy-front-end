@@ -41,7 +41,7 @@ var AUTOPREFIXER_BROWSERS = [
 // Lint JavaScript
 gulp.task('jshint', function () {
   return gulp.src('app/assets/scripts/**/*.js')
-    .pipe(reload({stream: true, once: true}))
+    .pipe(browserSync.reload({stream: true, once: true}))
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
     .pipe($.if(!browserSync.active, $.jshint.reporter('fail')))
@@ -110,39 +110,36 @@ gulp.task('styles', function () {
     .pipe($.size({title: 'styles'}));
 });
 
+gulp.task('templates:build', ['clean'], function () {
+  return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
+    .pipe(del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html'], {dot: true}))
+    .pipe($.layout({
+      layout: 'app/layout.html',
+      engine: 'ejs',
+      title: 'Front End Starter Kit'
+    }))
+    .pipe(gulp.dest('.tmp'));
+});
+
 // Scan your HTML for assets & optimize them
 gulp.task('html', function () {
   var assets = $.useref.assets({searchPath: '{.tmp,app}'});
 
-  return gulp.src('app/**/*.html')
+  return gulp.src('.tmp/**/*.html')
     .pipe(assets)
     // Concatenate and minify JavaScript
     .pipe($.if('*.js', $.uglify({preserveComments: 'some'})))
-    // Remove any unused CSS
-    // Note: if not using the Style Guide, you can delete it from
-    //       the next line to only include styles your project uses.
-    .pipe($.if('*.css', $.uncss({
-      html: [
-        'app/index.html'
-        // 'app/styleguide.html'
-      ],
-      // CSS Selectors for UnCSS to ignore
-      ignore: [
-        /.navdrawer-container.open/,
-        /.app-bar.open/
-      ]
-    })))
+
     // Concatenate and minify styles
     // In case you are still using useref build blocks
     .pipe($.if('*.css', $.csso()))
     .pipe(assets.restore())
     .pipe($.useref())
-    // Update production Style Guide paths
-    .pipe($.replace('components/components.css', 'components/main.min.css'))
     // Minify any HTML
     .pipe($.if('*.html', $.minifyHtml()))
     // Output files
     .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest('.tmp'))
     .pipe($.size({title: 'html'}));
 });
 
@@ -150,7 +147,7 @@ gulp.task('html', function () {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 
 // Watch files for changes & reload
-gulp.task('serve', ['styles'], function () {
+gulp.task('serve', ['styles', 'templates:build'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -159,10 +156,10 @@ gulp.task('serve', ['styles'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: ['.tmp', 'app', 'app/assets']
+    server: ['.tmp', 'app', 'app/assets', 'bower_components']
   });
 
-  gulp.watch(['app/**/*.html']).on('change', browserSync.reload);
+  gulp.watch(['app/**/*.html'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
   gulp.watch(['app/assets/scripts/**/*.js'], ['jshint']);
   gulp.watch(['app/assets/images/**/*']).on('change', browserSync.reload);
@@ -183,7 +180,7 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', ['jshint', 'html', 'images', 'fonts', 'copy'], cb);
+  runSequence('styles', 'templates:build', ['jshint', 'html', 'images', 'fonts', 'copy'], cb);
 });
 
 // Run PageSpeed Insights
