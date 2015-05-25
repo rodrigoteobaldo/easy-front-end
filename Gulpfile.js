@@ -110,9 +110,9 @@ gulp.task('styles', function () {
     .pipe($.size({title: 'styles'}));
 });
 
-gulp.task('templates:build', ['clean'], function () {
+gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
-    .pipe(del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html'], {dot: true}))
+    .pipe($.frontMatter())
     .pipe($.layout({
       layout: 'app/layout.html',
       engine: 'ejs',
@@ -120,6 +120,8 @@ gulp.task('templates:build', ['clean'], function () {
     }))
     .pipe(gulp.dest('.tmp'));
 });
+
+gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html'], {dot: true}));
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function () {
