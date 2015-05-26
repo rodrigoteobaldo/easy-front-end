@@ -144,7 +144,7 @@ gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html']
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function () {
-  var assets = $.useref.assets({searchPath: '{.tmp,app}'});
+  var assets = $.useref.assets({searchPath: '{.tmp,app,app/assets}'});
 
   return gulp.src('.tmp/**/*.html')
     .pipe(assets)
