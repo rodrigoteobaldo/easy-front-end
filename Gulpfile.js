@@ -25,6 +25,7 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var pagespeed = require('psi');
+var svgo = require('imagemin-svgo');
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 10',
@@ -50,29 +51,47 @@ gulp.task('jshint', function () {
 
 // Optimize images
 gulp.task('images', function () {
-  return gulp.src('app/assets/images/**/*')
-    .pipe($.cache($.imagemin({
-      progressive: true,
-      interlaced: true
-    })))
-    .pipe(gulp.dest('dist/images'))
-    .pipe($.size({title: 'images'}));
+  return gulp.src([
+    'app/assets/images/**/*',
+    '!app/assets/images/**/*.svg'
+  ])
+  .pipe($.cache($.imagemin({
+    progressive: true,
+    interlaced: true
+  })))
+  .pipe(gulp.dest('dist/images'))
+  .pipe($.size({title: 'images'}));
 });
 
-// Optimize images
+// Optimize and create SVG sprite
 gulp.task('svgo', function () {
   return gulp.src('app/assets/images/**/*.svg')
-    .pipe($.imageminSvgo())
+    .pipe($.imagemin({
+      use: [
+        svgo({
+        plugins: [
+          {removeEmptyAttrs: true},
+          {removeUselessStrokeAndFill: true}]
+        })
+      ]
+    }))
     .pipe($.svgstore())
+    .pipe($.rename('icons.svg'))
     .pipe(gulp.dest('dist/images'))
+    .pipe(gulp.dest('.tmp/images'))
     .pipe($.size({title: 'svg'}));
 });
 
 // Copy all files at the root level (app)
 gulp.task('copy', function () {
   return gulp.src([
-    'app/*',
+    // Ignore
+    '!app/partials',
+    '!app/components',
+    '!app/pages',
     '!app/*.html',
+
+    'app/*',
     'node_modules/apache-server-configs/dist/.htaccess'
   ], {
     dot: true
@@ -149,7 +168,7 @@ gulp.task('html', function () {
 gulp.task('clean', del.bind(null, ['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
 
 // Watch files for changes & reload
-gulp.task('serve', ['styles', 'templates:build'], function () {
+gulp.task('serve', ['styles', 'templates:build', 'svgo'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -164,7 +183,7 @@ gulp.task('serve', ['styles', 'templates:build'], function () {
   gulp.watch(['app/**/*.html'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
   gulp.watch(['app/assets/scripts/**/*.js'], ['jshint']);
-  gulp.watch(['app/assets/images/**/*']).on('change', browserSync.reload);
+  gulp.watch(['app/assets/images/**/*'], [browserSync.reload, 'svgo']);
 });
 
 // Build and serve the output from the dist build
@@ -182,7 +201,7 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'templates:build', ['jshint', 'html', 'images', 'fonts', 'copy'], cb);
+  runSequence('styles', 'templates:build', ['jshint', 'html', 'images', 'svgo', 'fonts', 'copy'], cb);
 });
 
 // Run PageSpeed Insights
