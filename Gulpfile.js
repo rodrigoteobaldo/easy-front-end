@@ -113,10 +113,10 @@ gulp.task('styles', function () {
 gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
     .pipe($.frontMatter())
-    .pipe($.layout({
-      layout: 'app/layout.html',
-      engine: 'ejs',
-      title: 'Front End Starter Kit'
+    .pipe($.layout(function(file) {
+      file.frontMatter.layout = 'app/layout.html';
+      file.frontMatter.engine = 'ejs';
+      return file.frontMatter;
     }))
     .pipe(gulp.dest('.tmp'));
 });
