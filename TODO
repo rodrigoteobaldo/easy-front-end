@@ -1,0 +1,7 @@
+## TODO
+- ~~[x] Adicionar load de css em arquivo Sass;~~
+- ~~[x] Suporte a HTML partials;~~
+- [ ] Suporte a imagens WebP;
+- ~~[x] Quando adicionado qualquer arquivo novo de imagem ou svg nos diretórios, o browser sync cai;~~
+- [ ] O server cai quando acontece um erro no Sass;
+- [ ] Adicionar notificação de onde está o erro quando acontece no Sass;

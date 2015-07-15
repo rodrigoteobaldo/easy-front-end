@@ -5,5 +5,7 @@ npm-error.log
 
 node_modules/
 bower_components/
+app/assets/vendor
 dist/
 .tmp
+.sass-cache

@@ -35,51 +35,26 @@ var AUTOPREFIXER_BROWSERS = [
   'safari >= 7',
   'opera >= 23',
   'ios >= 7',
-  'android >= 4.4',
+  'android >= 4.0',
   'bb >= 10'
 ];
 
-// Lint JavaScript
-gulp.task('jshint', function () {
-  return gulp.src('app/assets/scripts/**/*.js')
-    .pipe(browserSync.reload({stream: true, once: true}))
-    .pipe($.jshint())
-    .pipe($.jshint.reporter('jshint-stylish'))
-    .pipe($.if(!browserSync.active, $.jshint.reporter('fail')))
-    .pipe(browserSync.stream());
-});
-
 // Optimize images
 gulp.task('images', function () {
-  return gulp.src([
-    'app/assets/images/**/*',
-    '!app/assets/images/**/*.svg'
-  ])
+  return gulp.src(['app/assets/images/**/*'])
   .pipe($.cache($.imagemin({
     progressive: true,
-    interlaced: true
+    interlaced: true,
+    use: [
+      svgo({
+      plugins: [
+        {removeEmptyAttrs: true},
+        {removeUselessStrokeAndFill: true}]
+      })
+    ]
   })))
   .pipe(gulp.dest('dist/images'))
   .pipe($.size({title: 'images'}));
-});
-
-// Optimize and create SVG sprite
-gulp.task('svgo', function () {
-  return gulp.src('app/assets/images/**/*.svg')
-    .pipe($.imagemin({
-      use: [
-        svgo({
-        plugins: [
-          {removeEmptyAttrs: true},
-          {removeUselessStrokeAndFill: true}]
-        })
-      ]
-    }))
-    .pipe($.svgstore())
-    .pipe($.rename('icons.svg'))
-    .pipe(gulp.dest('dist/images'))
-    .pipe(gulp.dest('.tmp/images'))
-    .pipe($.size({title: 'svg'}));
 });
 
 // Copy all files at the root level (app)
@@ -116,9 +91,10 @@ gulp.task('styles', function () {
     .pipe($.sourcemaps.init())
     .pipe($.changed('.tmp/styles'))
     .pipe($.sass({
-      includePath: ['bower_components'],
       precision: 10,
+      errLogToConsole: true
     }).on('error', $.sass.logError))
+    .pipe($.cssimport())
     .pipe($.autoprefixer({browsers: AUTOPREFIXER_BROWSERS}))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
@@ -132,6 +108,9 @@ gulp.task('styles', function () {
 gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
     .pipe($.frontMatter())
+    .pipe($.hb({
+      partials: './app/partials/**/*.hbs'
+    }))
     .pipe($.layout(function(file) {
       file.frontMatter.layout = 'app/layout.html';
       file.frontMatter.engine = 'ejs';
@@ -165,10 +144,13 @@ gulp.task('html', function () {
 });
 
 // Clean output directory
-gulp.task('clean', del.bind(null, ['.tmp', 'dist/*', '!dist/.git'], {dot: true}));
+gulp.task('clean', function () {
+  $.cache.clearAll();
+  del.bind(null, ['.tmp', 'dist/*', '!dist/.git'], {dot: true});
+});
 
 // Watch files for changes & reload
-gulp.task('serve', ['styles', 'templates:build', 'svgo'], function () {
+gulp.task('serve', ['styles', 'templates:build'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -177,13 +159,11 @@ gulp.task('serve', ['styles', 'templates:build', 'svgo'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: ['.tmp', 'app', 'app/assets', 'bower_components']
+    server: ['.tmp', 'app', 'app/assets']
   });
 
   gulp.watch(['app/**/*.html'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
-  gulp.watch(['app/assets/scripts/**/*.js'], ['jshint']);
-  gulp.watch(['app/assets/images/**/*'], [browserSync.reload, 'svgo']);
 });
 
 // Build and serve the output from the dist build
@@ -201,7 +181,7 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'templates:build', ['jshint', 'html', 'images', 'svgo', 'fonts', 'copy'], cb);
+  runSequence('styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
 });
 
 // Run PageSpeed Insights

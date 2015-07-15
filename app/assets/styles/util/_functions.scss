@@ -1,26 +1,19 @@
-/* // Transforma 'px' em 'em'
-em($px, $base = $base-font-size) {
-  return $px / $base * 1em
-}
+$font-size-base: 10px !default;
 
-// Transforma 'px' em 'rem' adicionando também fallback para browsers antigos
-rem($px, fallback = false) {
-
-  if (fallback) {
-    font-size: $px;
+@mixin clearfix() {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
   }
 
-  if ($px is inherit) {
-    do nothing, "inherit" has no unit
-  } else {
-    var u = unit($px);
-
-    if (u is 'px') {
-      font-size: unit($px/unit($base-font-size, 'px'), 'rem');
-    } else {
-      font-size: unit($px, u);
-    }
+  &:after {
+    clear: both;
   }
-
 }
- */
+
+//gerar font-size em PX e em REM
+@mixin font-size($sizeValue) {
+  font-size: $sizeValue;
+  font-size: #{$sizeValue / $font-size-base}rem;
+}
