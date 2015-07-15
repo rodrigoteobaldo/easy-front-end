@@ -65,6 +65,7 @@ gulp.task('copy', function () {
     '!app/components',
     '!app/pages',
     '!app/*.html',
+    '!app/assets/',
 
     'app/*',
     'node_modules/apache-server-configs/dist/.htaccess'
