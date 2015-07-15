@@ -88,6 +88,7 @@ gulp.task('styles', function () {
     'app/assets/styles/*.{scss,sass}',
     'app/assets/styles/**/*.css'
   ])
+    .pipe($.plumber())
     .pipe($.sourcemaps.init())
     .pipe($.changed('.tmp/styles'))
     .pipe($.sass({
