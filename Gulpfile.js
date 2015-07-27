@@ -110,13 +110,14 @@ gulp.task('styles', function () {
 gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
     .pipe($.frontMatter())
-    .pipe($.hb({
-      partials: './app/partials/**/*.hbs'
-    }))
     .pipe($.layout(function(file) {
       file.frontMatter.layout = 'app/layout.html';
       file.frontMatter.engine = 'ejs';
       return file.frontMatter;
+    }))
+    .pipe($.hb({
+      bustCache: true,
+      partials: './app/partials/**/*.hbs'
     }))
     .pipe(gulp.dest('.tmp'));
 });
@@ -164,7 +165,7 @@ gulp.task('serve', ['styles', 'templates:build'], function () {
     server: ['.tmp', 'app', 'app/assets']
   });
 
-  gulp.watch(['app/**/*.html'], ['templates:build', browserSync.reload]);
+  gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
 });
 
