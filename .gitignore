@@ -9,3 +9,4 @@ app/assets/vendor
 dist/
 .tmp
 .sass-cache
+null/

@@ -1,7 +1,7 @@
 {
   "name": "front-end-starter-kit",
   "productName": "Front End Starter Kit",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Framework front-end com workflow simplificado.",
   "repository": {
     "type": "git",
@@ -20,7 +20,7 @@
     "gulp-autoprefixer": "^2.3.1",
     "gulp-cache": "0.2.10",
     "gulp-changed": "^1.2.1",
-    "gulp-cssimport": "^2.1.0",
+    "gulp-cssimport": "1.3.1",
     "gulp-csso": "^1.0.0",
     "gulp-front-matter": "^1.2.3",
     "gulp-hb": "^2.6.1",
