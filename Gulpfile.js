@@ -89,15 +89,12 @@ gulp.task('styles', function () {
     'app/assets/styles/*.{scss,sass}',
     'app/assets/styles/**/*.css'
   ])
-    .pipe($.plumber())
+    .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe($.sourcemaps.init())
     .pipe($.changed('.tmp/styles'))
-    .pipe($.sass({
-      precision: 10,
-      errLogToConsole: true
-    }).on('error', $.sass.logError))
+    .pipe($.sass({ precision: 10 }))
     .pipe($.cssimport())
-    .pipe($.autoprefixer({browsers: AUTOPREFIXER_BROWSERS}))
+    .pipe($.autoprefixer({ browsers: AUTOPREFIXER_BROWSERS }))
     .pipe($.purifycss(['app/**/*.js', 'app/**/*.html', 'app/**/*.hbs'], {info: true}))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
@@ -110,6 +107,7 @@ gulp.task('styles', function () {
 
 gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
+    .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe($.frontMatter())
     .pipe($.layout(function(file) {
       file.frontMatter.layout = 'app/layout.html';
