@@ -102,7 +102,7 @@ gulp.task('styles', function () {
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
     // Concatenate and minify styles
-    .pipe($.if('*.css', $.csso()))
+    .pipe($.if('*.css', $.minifyCss()))
     .pipe(gulp.dest('dist/styles'))
     .pipe(browserSync.stream())
     .pipe($.size({title: 'styles'}));
