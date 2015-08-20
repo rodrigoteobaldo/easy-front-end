@@ -95,7 +95,6 @@ gulp.task('styles', function () {
     .pipe($.sass({ precision: 10 }))
     .pipe($.cssimport())
     .pipe($.autoprefixer({ browsers: AUTOPREFIXER_BROWSERS }))
-    // .pipe($.purifycss(['app/**/*.js', 'app/**/*.html', 'app/**/*.hbs'], {info: true}))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
     // Concatenate and minify styles
