@@ -42,7 +42,7 @@ var AUTOPREFIXER_BROWSERS = [
 gulp.task('images', function () {
   return gulp.src([
     // Ignore
-    '!app/assets/images/icons/*',
+    // '!app/assets/images/icons/*',
 
     'app/assets/images/**/*'
   ])
@@ -170,7 +170,6 @@ gulp.task('serve', ['icons', 'styles', 'templates:build'], function () {
     server: ['.tmp', 'app', 'app/assets', 'app/layouts']
   });
 
-  gulp.watch(['app/icons/*.svg'], ['icons', browserSync.reload]);
   gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
 });
@@ -190,5 +189,5 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('icons', 'styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
+  runSequence('styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
 });
