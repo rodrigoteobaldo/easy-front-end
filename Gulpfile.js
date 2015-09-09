@@ -24,7 +24,6 @@ var $ = require('gulp-load-plugins')();
 var del = require('del');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
-var pagespeed = require('psi');
 var svgo = require('imagemin-svgo');
 
 var AUTOPREFIXER_BROWSERS = [
@@ -41,15 +40,20 @@ var AUTOPREFIXER_BROWSERS = [
 
 // Optimize images
 gulp.task('images', function () {
-  return gulp.src(['app/assets/images/**/*'])
+  return gulp.src([
+    // Ignore
+    '!app/assets/images/icons/*',
+
+    'app/assets/images/**/*'
+  ])
   .pipe($.cache($.imagemin({
     progressive: true,
     interlaced: true,
     use: [
       svgo({
-      plugins: [
-        {removeEmptyAttrs: true},
-        {removeUselessStrokeAndFill: true}]
+        plugins: [
+          {removeEmptyAttrs: true},
+          {removeUselessStrokeAndFill: true}]
       })
     ]
   })))
@@ -61,7 +65,7 @@ gulp.task('images', function () {
 gulp.task('copy', function () {
   return gulp.src([
     // Ignore
-    '!app/partials',
+    '!app/layouts/application.html',
     '!app/components',
     '!app/pages',
     '!app/*.html',
@@ -70,6 +74,7 @@ gulp.task('copy', function () {
     'app/*',
     'node_modules/apache-server-configs/dist/.htaccess'
   ], {
+    buffer: false,
     dot: true
   }).pipe(gulp.dest('dist'))
     .pipe($.size({title: 'copy'}));
@@ -105,17 +110,17 @@ gulp.task('styles', function () {
 });
 
 gulp.task('templates:build', ['templates:clean'], function () {
-  return gulp.src(['app/pages/**/*.html', '!app/layout.html'])
+  return gulp.src(['app/pages/**/*.html'])
     .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe($.frontMatter())
     .pipe($.layout(function(file) {
-      file.frontMatter.layout = 'app/layout.html';
+      file.frontMatter.layout = 'app/layouts/application.html';
       file.frontMatter.engine = 'ejs';
       return file.frontMatter;
     }))
     .pipe($.hb({
       bustCache: true,
-      partials: './app/partials/**/*.hbs'
+      partials: './app/components/**/*.hbs'
     }))
     .pipe(gulp.dest('.tmp'));
 });
@@ -136,6 +141,8 @@ gulp.task('html', function () {
     .pipe($.if('*.css', $.csso()))
     .pipe(assets.restore())
     .pipe($.useref())
+    // Insert SVG Inline
+    // .pipe($.svgIcons.replace())
     // Minify any HTML
     .pipe($.if('*.html', $.minifyHtml()))
     // Output files
@@ -151,7 +158,7 @@ gulp.task('clean', function () {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['styles', 'templates:build'], function () {
+gulp.task('serve', ['icons', 'styles', 'templates:build'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -160,9 +167,10 @@ gulp.task('serve', ['styles', 'templates:build'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: ['.tmp', 'app', 'app/assets']
+    server: ['.tmp', 'app', 'app/assets', 'app/layouts']
   });
 
+  gulp.watch(['app/icons/*.svg'], ['icons', browserSync.reload]);
   gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', browserSync.reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
 });
@@ -182,19 +190,5 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
+  runSequence('icons', 'styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
 });
-
-// Run PageSpeed Insights
-gulp.task('pagespeed', function (cb) {
-  // Update the below URL to the public URL of your site
-  pagespeed.output('example.com', {
-    strategy: 'mobile',
-    // By default we use the PageSpeed Insights free (no API key) tier.
-    // Use a Google Developer API key if you have one: http://goo.gl/RkN0vE
-    // key: 'YOUR_API_KEY'
-  }, cb);
-});
-
-// Load custom tasks from the `tasks` directory
-// try { require('require-dir')('tasks'); } catch (err) { console.error(err); }
