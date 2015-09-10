@@ -158,7 +158,7 @@ gulp.task('clean', function () {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['icons', 'styles', 'templates:build'], function () {
+gulp.task('serve', ['styles', 'templates:build'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
