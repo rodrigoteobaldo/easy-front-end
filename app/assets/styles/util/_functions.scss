@@ -1,5 +1,3 @@
-$font-size-base: 10px !default;
-
 @mixin clearfix() {
   &:before,
   &:after {
@@ -14,6 +12,8 @@ $font-size-base: 10px !default;
 
 //gerar font-size em PX e em REM
 @mixin font-size($sizeValue) {
-  font-size: $sizeValue;
+  @if ($font-size-legacy-support) {
+    font-size: $sizeValue;
+  }
   font-size: #{$sizeValue / $font-size-base}rem;
 }
