@@ -1,8 +1,13 @@
 // base
-@import "base/base";
+@import 'base/variables';
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/print';
 
 // util
-@import "util/util";
+@import 'util/functions';
+@import 'util/general';
 
 // components
-@import "components/components";
+@import 'components/header';
+@import 'components/footer';
