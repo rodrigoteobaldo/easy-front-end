@@ -1,4 +1,5 @@
-$font-size-base: 10px !default;
+// Tamanho base da fonte
+$base-font-size: strip-unit(10px) !default;
 
-// Suporte de font-size para browsers anteriores ao IE10
-$font-size-legacy-support: true !default;
+// Suporte de font-size para >IE9 e Safari 5.0-5.1
+$font-size-legacy-support: false !default;

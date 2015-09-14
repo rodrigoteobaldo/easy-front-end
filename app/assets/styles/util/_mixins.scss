@@ -1,0 +1,22 @@
+// Mixin clearfix
+@mixin clearfix() {
+  &:before,
+  &:after {
+    content: " ";
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+// Gerar font-size em PX e em REM
+@mixin font-size($sizeValue) {
+  $sizeValue: strip-unit($sizeValue);
+
+  @if ($font-size-legacy-support) {
+    font-size: #{$sizeValue}px;
+  }
+  font-size: #{$sizeValue / $base-font-size}rem;
+}

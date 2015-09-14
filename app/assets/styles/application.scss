@@ -1,3 +1,7 @@
+// util
+@import 'util/functions';
+@import 'util/mixins';
+
 // base
 @import 'base/variables';
 @import 'base/reset';
@@ -5,7 +9,6 @@
 @import 'base/print';
 
 // util
-@import 'util/functions';
 @import 'util/general';
 
 // components

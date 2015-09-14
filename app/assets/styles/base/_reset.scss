@@ -30,9 +30,10 @@ time, mark, audio, video {
   color: inherit;
 }
 
-html { font-size: 62.5%; }
+html { font-size: #{($base-font-size / 16) * 100}%; }
 
 body {
+  @include font-size(19px);
 	line-height: 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
