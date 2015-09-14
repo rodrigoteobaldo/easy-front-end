@@ -66,10 +66,11 @@ gulp.task('copy', function () {
   return gulp.src([
     // Ignore
     '!app/layouts/application.html',
-    '!app/components',
-    '!app/pages',
+    '!app/components/',
+    '!app/pages/',
     '!app/*.html',
     '!app/assets/',
+    '!app/layouts/',
 
     'app/*',
     'node_modules/apache-server-configs/dist/.htaccess'
