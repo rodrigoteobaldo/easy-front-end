@@ -138,7 +138,7 @@ gulp.task('html', function () {
 
     // Concatenate and minify styles
     // In case you are still using useref build blocks
-    .pipe($.if('*.css', $.csso()))
+    .pipe($.if('*.css', $.minifyCss()))
     .pipe(assets.restore())
     .pipe($.useref())
     // Insert SVG Inline
