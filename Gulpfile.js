@@ -41,9 +41,6 @@ var AUTOPREFIXER_BROWSERS = [
 // Optimize images
 gulp.task('images', function () {
   return gulp.src([
-    // Ignore
-    // '!app/assets/images/icons/*',
-
     'app/assets/images/**/*'
   ])
   .pipe($.cache($.imagemin({
@@ -77,15 +74,13 @@ gulp.task('copy', function () {
   ], {
     buffer: false,
     dot: true
-  }).pipe(gulp.dest('dist'))
-    .pipe($.size({title: 'copy'}));
+  }).pipe(gulp.dest('dist'));
 });
 
 // Copy web fonts to dist
 gulp.task('fonts', function () {
   return gulp.src(['app/assets/fonts/**'])
-    .pipe(gulp.dest('dist/fonts'))
-    .pipe($.size({title: 'fonts'}));
+    .pipe(gulp.dest('dist/fonts'));
 });
 
 // Compile and automatically prefix stylesheets
@@ -100,12 +95,13 @@ gulp.task('styles', function () {
     .pipe($.changed('.tmp/styles'))
     .pipe($.sass({ precision: 10 }))
     .pipe($.cssimport())
-    .pipe($.autoprefixer({ browsers: AUTOPREFIXER_BROWSERS }))
+    .pipe($.cssnano({
+      autoprefixer: { browsers: AUTOPREFIXER_BROWSERS },
+      discardComments: { removeAll: true }
+    }))
+    .pipe(gulp.dest('dist/styles'))
     .pipe($.sourcemaps.write())
     .pipe(gulp.dest('.tmp/styles'))
-    // Concatenate and minify styles
-    .pipe($.if('*.css', $.minifyCss()))
-    .pipe(gulp.dest('dist/styles'))
     .pipe(browserSync.stream())
     .pipe($.size({title: 'styles'}));
 });
@@ -136,20 +132,11 @@ gulp.task('html', function () {
     .pipe(assets)
     // Concatenate and minify JavaScript
     .pipe($.if('*.js', $.uglify({preserveComments: 'some'})))
-
-    // Concatenate and minify styles
-    // In case you are still using useref build blocks
-    .pipe($.if('*.css', $.minifyCss()))
     .pipe(assets.restore())
     .pipe($.useref())
-    // Insert SVG Inline
-    // .pipe($.svgIcons.replace())
-    // Minify any HTML
-    .pipe($.if('*.html', $.minifyHtml()))
     // Output files
     .pipe(gulp.dest('dist'))
-    .pipe(gulp.dest('.tmp'))
-    .pipe($.size({title: 'html'}));
+    .pipe(gulp.dest('.tmp'));
 });
 
 // Clean output directory
@@ -190,5 +177,5 @@ gulp.task('serve:dist', ['default'], function () {
 
 // Build production files, the default task
 gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'templates:build', ['html', 'images', 'fonts', 'copy'], cb);
+  runSequence('styles', 'templates:build', ['html', 'fonts', 'images', 'copy'], cb);
 });

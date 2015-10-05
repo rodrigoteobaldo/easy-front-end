@@ -6,15 +6,8 @@ Framework front-end com workflow simplificado.
 
 ## Instalação
 
-Você precisa ter instalado o *Node.js*. Caso não tenha, baixe [aqui](http://nodejs.org/).
-
-Se você já tiver o *Node.js* instalado, precisa instalar também o [Gulp](http://gulpjs.com/) e o [Bower](http://bower.io/). Ambos podem ser instalados utilizando o comando:
-
-```
-npm install -g bower gulp
-```
-
-(É necessário já ter o *Node.js* instalado).
+É necessário já ter o *Node.js* 0.12.x (Versão suportada até o momento).
+Caso não tenha, baixe [aqui](https://nodejs.org/dist/v0.12.7/).
 
 ## Como utilizar
 
@@ -22,9 +15,27 @@ npm install -g bower gulp
 
 2 - Acesse a pasta do projeto via terminal/cmd;
 
-3 - Instale as dependências do projeto utilizando `npm install` e depois `bower install`;
+3 - Instale as dependências do projeto utilizando `npm run deps:get`;
 
-(Caso qualquer um desses comandos não estiverem disponíveis no terminal/cmd, vide [Instalação](#instalacao))
+4 - Utilize o comando `npm run server` para iniciar o servidor;
 
-4 - utilize o comando `gulp serve` para iniciar o servidor;
+## Comandos
+`npm run server`
 
+Inicia o servidor para desenvolvimento e aguarda por alterações no projeto;
+
+`npm run server:dist`
+
+Inicia servidor na pasta de distribuição;
+
+`npm run build`
+
+Compila o app na pasta `dist` e deixando-o pronto para produção;
+
+`npm run build:styles`
+
+Compila somente o Sass para a pasta `dist`;
+
+`npm run build:images`
+
+Compila somente as imagens para a pasta `dist`;
