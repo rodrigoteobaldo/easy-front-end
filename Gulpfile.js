@@ -126,7 +126,7 @@ gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html']
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function () {
-  var assets = $.useref.assets({searchPath: '{.tmp,app,app/assets}'});
+  var assets = $.useref.assets({searchPath: '{.tmp,app,app/assets,node_modules}'});
 
   return gulp.src('.tmp/**/*.html')
     .pipe(assets)
@@ -146,7 +146,7 @@ gulp.task('clean', function () {
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['styles', 'templates:build'], function () {
+gulp.task('serve', ['clean', 'styles', 'templates:build'], function () {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -155,7 +155,7 @@ gulp.task('serve', ['styles', 'templates:build'], function () {
     // Note: this uses an unsigned certificate which on first access
     //       will present a certificate warning in the browser.
     // https: true,
-    server: ['.tmp', 'app', 'app/assets', 'app/layouts']
+    server: ['.tmp', 'app', 'app/assets', 'app/layouts', 'node_modules']
   });
 
   gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', browserSync.reload]);
