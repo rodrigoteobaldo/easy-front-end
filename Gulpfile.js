@@ -126,14 +126,13 @@ gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html']
 
 // Scan your HTML for assets & optimize them
 gulp.task('html', function () {
-  var assets = $.useref.assets({searchPath: '{.tmp,app,app/assets,node_modules}'});
 
   return gulp.src('.tmp/**/*.html')
-    .pipe(assets)
     // Concatenate and minify JavaScript
-    .pipe($.if('*.js', $.uglify({preserveComments: 'some'})))
-    .pipe(assets.restore())
-    .pipe($.useref())
+    .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
+    .pipe($.useref({
+      searchPath: '{.tmp,app,app/assets,node_modules}'
+    }))
     // Output files
     .pipe(gulp.dest('dist'))
     .pipe(gulp.dest('.tmp'));
@@ -142,7 +141,7 @@ gulp.task('html', function () {
 // Clean output directory
 gulp.task('clean', function () {
   $.cache.clearAll();
-  del.bind(null, ['.tmp', 'dist/*', '!dist/.git'], {dot: true});
+  del(['.tmp', 'dist/*', '!dist/.git'], {dot: true});
 });
 
 // Watch files for changes & reload
