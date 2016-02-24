@@ -128,11 +128,11 @@ gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html']
 gulp.task('html', function () {
 
   return gulp.src('.tmp/**/*.html')
+    .pipe($.useref({
+      searchPath: ['app/assets', 'node_modules']
+    }))
     // Concatenate and minify JavaScript
     .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
-    .pipe($.useref({
-      searchPath: '{.tmp,app,app/assets,node_modules}'
-    }))
     // Output files
     .pipe(gulp.dest('dist'))
     .pipe(gulp.dest('.tmp'));
