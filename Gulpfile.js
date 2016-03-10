@@ -25,6 +25,7 @@ var del = require('del');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var svgo = require('imagemin-svgo');
+var panini = require('panini');
 
 var AUTOPREFIXER_BROWSERS = [
   'ie >= 9',
@@ -62,7 +63,7 @@ gulp.task('images', function () {
 gulp.task('copy', function () {
   return gulp.src([
     // Ignore
-    '!app/layouts/application.html',
+    '!app/layouts/*.html',
     '!app/components/',
     '!app/pages/',
     '!app/*.html',
@@ -109,15 +110,10 @@ gulp.task('styles', function () {
 gulp.task('templates:build', ['templates:clean'], function () {
   return gulp.src(['app/pages/**/*.html'])
     .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
-    .pipe($.frontMatter())
-    .pipe($.layout(function(file) {
-      file.frontMatter.layout = 'app/layouts/application.html';
-      file.frontMatter.engine = 'ejs';
-      return file.frontMatter;
-    }))
-    .pipe($.hb({
-      bustCache: true,
-      partials: './app/components/**/*.hbs'
+    .pipe(panini({
+      root: 'app/pages',
+      layouts: 'app/layouts',
+      partials: 'app/components'
     }))
     .pipe(gulp.dest('.tmp'));
 });
@@ -148,12 +144,8 @@ gulp.task('clean', function () {
 gulp.task('serve', ['clean', 'styles', 'templates:build'], function () {
   browserSync({
     notify: false,
-    // Customize the BrowserSync console logging prefix
     logPrefix: 'FESK',
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
+    https: true,
     server: ['.tmp', 'app', 'app/assets', 'app/layouts', 'node_modules']
   });
 
@@ -166,10 +158,7 @@ gulp.task('serve:dist', ['default'], function () {
   browserSync({
     notify: false,
     logPrefix: 'FESK',
-    // Run as an https by uncommenting 'https: true'
-    // Note: this uses an unsigned certificate which on first access
-    //       will present a certificate warning in the browser.
-    // https: true,
+    https: true,
     server: 'dist'
   });
 });

@@ -15,11 +15,13 @@ Caso não tenha, baixe [aqui](https://nodejs.org/dist/v0.12.7/).
 
 2 - Acesse a pasta do projeto via terminal/cmd;
 
-3 - Instale as dependências do projeto utilizando `npm run deps:get`;
+3 - Instale as dependências do projeto utilizando `npm install`;
 
 4 - Utilize o comando `npm run server` para iniciar o servidor;
 
 ## Comandos
+`npm start`
+ou
 `npm run server`
 
 Inicia o servidor para desenvolvimento e aguarda por alterações no projeto;
