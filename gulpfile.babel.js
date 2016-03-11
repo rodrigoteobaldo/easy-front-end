@@ -19,15 +19,18 @@
 'use strict';
 
 // Include Gulp & tools we'll use
-var gulp = require('gulp');
-var $ = require('gulp-load-plugins')();
-var del = require('del');
-var runSequence = require('run-sequence');
-var browserSync = require('browser-sync');
-var svgo = require('imagemin-svgo');
-var panini = require('panini');
+import gulp from 'gulp';
+import gulpLoadPlugins from 'gulp-load-plugins';
+import del from 'del';
+import runSequence from 'run-sequence';
+import browserSync from 'browser-sync';
+import svgo from 'imagemin-svgo';
+import panini from 'panini';
 
-var AUTOPREFIXER_BROWSERS = [
+const $ = gulpLoadPlugins();
+const reload = browserSync.reload;
+
+const AUTOPREFIXER_BROWSERS = [
   'ie >= 9',
   'ie_mob >= 10',
   'ff >= 30',
@@ -40,7 +43,7 @@ var AUTOPREFIXER_BROWSERS = [
 ];
 
 // Optimize images
-gulp.task('images', function () {
+gulp.task('images', () => {
   return gulp.src([
     'app/assets/images/**/*'
   ])
@@ -60,7 +63,7 @@ gulp.task('images', function () {
 });
 
 // Copy all files at the root level (app)
-gulp.task('copy', function () {
+gulp.task('copy', () => {
   return gulp.src([
     // Ignore
     '!app/layouts/*.html',
@@ -79,13 +82,13 @@ gulp.task('copy', function () {
 });
 
 // Copy web fonts to dist
-gulp.task('fonts', function () {
+gulp.task('fonts', () => {
   return gulp.src(['app/assets/fonts/**'])
     .pipe(gulp.dest('dist/fonts'));
 });
 
 // Compile and automatically prefix stylesheets
-gulp.task('styles', function () {
+gulp.task('styles', () => {
   // For best performance, don't add Sass partials to `gulp.src`
   return gulp.src([
     'app/assets/styles/*.{scss,sass}',
@@ -107,7 +110,7 @@ gulp.task('styles', function () {
     .pipe($.size({title: 'styles'}));
 });
 
-gulp.task('templates:build', ['templates:clean'], function () {
+gulp.task('templates:build', ['templates:clean'], () => {
   return gulp.src(['app/pages/**/*.html'])
     .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe(panini({
@@ -121,49 +124,61 @@ gulp.task('templates:build', ['templates:clean'], function () {
 gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html'], {dot: true}));
 
 // Scan your HTML for assets & optimize them
-gulp.task('html', function () {
-
+gulp.task('scripts', () => {
   return gulp.src('.tmp/**/*.html')
     .pipe($.useref({
       searchPath: ['app/assets', 'node_modules']
     }))
-    // Concatenate and minify JavaScript
+    .pipe($.if('*.js', $.babel()))
     .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
-    // Output files
-    .pipe(gulp.dest('dist'))
-    .pipe(gulp.dest('.tmp'));
+    .pipe(gulp.dest('.tmp'))
+    // adicionar sourcemaps
+    .pipe(gulp.dest('dist'));
 });
 
 // Clean output directory
-gulp.task('clean', function () {
+gulp.task('clean', () => {
   $.cache.clearAll();
   del(['.tmp', 'dist/*', '!dist/.git'], {dot: true});
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['clean', 'styles', 'templates:build'], function () {
-  browserSync({
-    notify: false,
-    logPrefix: 'FESK',
-    https: true,
-    server: ['.tmp', 'app', 'app/assets', 'app/layouts', 'node_modules']
-  });
+gulp.task('serve', ['clean'], () => {
+  runSequence(
+    'styles',
+    'templates:build',
+    ['scripts'],
+    () => {
+      browserSync({
+        notify: false,
+        logPrefix: 'FESK',
+        // https: true,
+        server: ['.tmp', 'app', 'app/assets/', 'node_modules']
+      });
+    }
+  );
 
-  gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', browserSync.reload]);
+
+  gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', reload]);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
+  gulp.watch(['app/assets/styles/**/*.{js}'], ['scripts']);
 });
 
 // Build and serve the output from the dist build
-gulp.task('serve:dist', ['default'], function () {
+gulp.task('serve:dist', ['default'], () => {
   browserSync({
     notify: false,
     logPrefix: 'FESK',
-    https: true,
+    // https: true,
     server: 'dist'
   });
 });
 
 // Build production files, the default task
-gulp.task('default', ['clean'], function (cb) {
-  runSequence('styles', 'templates:build', ['html', 'fonts', 'images', 'copy'], cb);
+gulp.task('default', ['clean'], () => {
+  runSequence(
+    'styles',
+    'templates:build',
+    ['scripts', 'fonts', 'images', 'copy']
+  );
 });

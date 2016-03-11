@@ -1,6 +1,3 @@
-(function () {
-  'use strict';
+import { hello } from 'components/header';
 
-  // Coloque seu código aqui
-
-})();
+hello();
