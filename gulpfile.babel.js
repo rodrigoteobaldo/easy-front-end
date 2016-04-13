@@ -100,7 +100,7 @@ gulp.task('styles', () => {
     .pipe($.sass({ precision: 10 }))
     .pipe($.cssimport())
     .pipe($.cssnano({
-      autoprefixer: { browsers: AUTOPREFIXER_BROWSERS },
+      autoprefixer: { browsers: AUTOPREFIXER_BROWSERS, add: true },
       discardComments: { removeAll: true }
     }))
     .pipe(gulp.dest('dist/styles'))
