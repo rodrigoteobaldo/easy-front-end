@@ -26,6 +26,11 @@ import runSequence from 'run-sequence';
 import browserSync from 'browser-sync';
 import svgo from 'imagemin-svgo';
 import panini from 'panini';
+import rollup from 'rollup-stream'
+import babel from 'rollup-plugin-babel'
+import uglify from 'rollup-plugin-uglify'
+import commonjs from 'rollup-plugin-commonjs'
+import nodeResolve from 'rollup-plugin-node-resolve'
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
@@ -110,30 +115,53 @@ gulp.task('styles', () => {
     .pipe($.size({title: 'styles'}));
 });
 
-gulp.task('templates:build', ['templates:clean'], () => {
+gulp.task('templates:build', () => {
   return gulp.src(['app/pages/**/*.html'])
     .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe(panini({
-      root: 'app/pages',
-      layouts: 'app/layouts',
-      partials: 'app/components'
+      root: 'app/pages/',
+      layouts: 'app/layouts/',
+      partials: 'app/components/'
     }))
-    .pipe(gulp.dest('.tmp'));
+    .pipe(gulp.dest('.tmp'))
+    .pipe(gulp.dest('dist'))
+    .on('finish', browserSync.reload);
 });
 
-gulp.task('templates:clean', del.bind(null, ['.tmp/**/*.html', 'dist/**/*.html'], {dot: true}));
+gulp.task('templates:refresh', (done) => {
+  panini.refresh();
+  gulp.start('templates:build');
+  done();
+});
 
 // Scan your HTML for assets & optimize them
 gulp.task('scripts', () => {
-  return gulp.src('.tmp/**/*.html')
-    .pipe($.useref({
-      searchPath: ['app/assets', 'node_modules']
-    }))
-    .pipe($.if('*.js', $.babel()))
-    .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
-    .pipe(gulp.dest('.tmp'))
-    // adicionar sourcemaps
-    .pipe(gulp.dest('dist'));
+  return rollup({
+    entry: 'app/assets/scripts/main.js',
+    format: 'iife',
+    // sourceMap: true,
+    plugins: [
+      babel({
+        presets: ["es2015-rollup"],
+        babelrc: false
+      }),
+      nodeResolve({
+        jsnext: true,
+        main: true,
+        browser: true, // Prefer browser-ready packages
+        extensions: ['.js', '.json']
+      }),
+      commonjs({
+        include: 'node_modules/**/*'
+      }),
+      uglify()
+    ]
+  })
+  // .pipe($.babel())
+  // .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
+  .pipe(gulp.dest('.tmp'))
+  // adicionar sourcemaps
+  .pipe(gulp.dest('dist'));
 });
 
 // Clean output directory
@@ -147,7 +175,7 @@ gulp.task('serve', ['clean'], () => {
   runSequence(
     'styles',
     'templates:build',
-    ['scripts'],
+    // ['scripts'],
     () => {
       browserSync({
         notify: false,
@@ -159,9 +187,10 @@ gulp.task('serve', ['clean'], () => {
   );
 
 
-  gulp.watch(['app/**/*.{html,hbs}'], ['templates:build', reload]);
+  gulp.watch(['app/pages/**/*.{html,hbs}'], ['templates:build']);
+  gulp.watch(['app/{layouts,components}/**/*.{html,hbs}'], ['templates:refresh']);
   gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
-  gulp.watch(['app/assets/styles/**/*.{js}'], ['scripts']);
+  // gulp.watch(['app/assets/styles/**/*.{js}'], ['scripts']);
 });
 
 // Build and serve the output from the dist build
@@ -179,6 +208,6 @@ gulp.task('default', ['clean'], () => {
   runSequence(
     'styles',
     'templates:build',
-    ['scripts', 'fonts', 'images', 'copy']
+    [/*'scripts',*/ 'fonts', 'images', 'copy']
   );
 });
