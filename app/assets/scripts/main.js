@@ -1,3 +1,3 @@
-import { hello } from 'components/header';
+import hello from './components/header';
 
 hello();

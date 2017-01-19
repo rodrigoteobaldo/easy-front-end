@@ -19,21 +19,38 @@
 'use strict';
 
 // Include Gulp & tools we'll use
-import gulp from 'gulp';
-import gulpLoadPlugins from 'gulp-load-plugins';
-import del from 'del';
-import runSequence from 'run-sequence';
-import browserSync from 'browser-sync';
-import svgo from 'imagemin-svgo';
-import panini from 'panini';
-import rollup from 'rollup-stream'
-import babel from 'rollup-plugin-babel'
-import uglify from 'rollup-plugin-uglify'
-import commonjs from 'rollup-plugin-commonjs'
-import nodeResolve from 'rollup-plugin-node-resolve'
+import gulp from 'gulp'
+import gulpLoadPlugins from 'gulp-load-plugins'
+import del from 'del'
+import runSequence from 'run-sequence'
+import browserSync from 'browser-sync'
+import svgo from 'imagemin-svgo'
+import panini from 'panini'
+import webpack from 'webpack'
+import webpackStream from 'webpack-stream'
 
-const $ = gulpLoadPlugins();
-const reload = browserSync.reload;
+const $ = gulpLoadPlugins()
+const reload = browserSync.reload
+
+/**
+ * DESTINATION FOLDERS
+ */
+
+const Path = {
+  VENDOR: './app/vendor',
+  PUBLIC: './app/public',
+  STYLES: './app/assets/styles',
+  SCRIPTS: './app/assets/styles',
+  IMAGES: './app/assets/images',
+  FONTS: './app/assets/fonts'
+}
+
+const DEST_ROOT    = `./dist` // CAUTION: This directory will be automatically removed every build
+const DEST_PUBLIC  = DEST_ROOT
+const DEST_IMG     = `${DEST_ROOT}/images`
+const DEST_FONTS   = `${DEST_ROOT}/fonts`
+const DEST_SCRIPTS = `${DEST_ROOT}/scripts`
+const DEST_STYLES  = `${DEST_ROOT}/styles`
 
 const AUTOPREFIXER_BROWSERS = [
   'ie >= 9',
@@ -63,33 +80,26 @@ gulp.task('images', () => {
       })
     ]
   })))
-  .pipe(gulp.dest('dist/images'))
+  .pipe(gulp.dest(DEST_IMG))
   .pipe($.size({title: 'images'}));
 });
 
 // Copy all files at the root level (app)
 gulp.task('copy', () => {
   return gulp.src([
-    // Ignore
-    '!app/layouts/*.html',
-    '!app/components/',
-    '!app/pages/',
-    '!app/*.html',
-    '!app/assets/',
-    '!app/layouts/',
-
-    'app/*',
-    'node_modules/apache-server-configs/dist/.htaccess'
-  ], {
+      'app/public/*',
+      'node_modules/apache-server-configs/dist/.htaccess'
+    ],
+    {
     buffer: false,
     dot: true
-  }).pipe(gulp.dest('dist'));
+  }).pipe(gulp.dest(DEST_ROOT));
 });
 
 // Copy web fonts to dist
 gulp.task('fonts', () => {
   return gulp.src(['app/assets/fonts/**'])
-    .pipe(gulp.dest('dist/fonts'));
+    .pipe(gulp.dest(DEST_FONTS));
 });
 
 // Compile and automatically prefix stylesheets
@@ -101,16 +111,15 @@ gulp.task('styles', () => {
   ])
     .pipe($.plumber({ errorHandler: $.notify.onError('Error: <%= error.message %>') }))
     .pipe($.sourcemaps.init())
-    .pipe($.changed('.tmp/styles'))
+    .pipe($.changed(DEST_STYLES))
     .pipe($.sass({ precision: 10 }))
-    .pipe($.cssimport())
+    .pipe($.cssimport({ includePaths: [Path.VENDOR] }))
     .pipe($.cssnano({
       autoprefixer: { browsers: AUTOPREFIXER_BROWSERS, add: true },
       discardComments: { removeAll: true }
     }))
-    .pipe(gulp.dest('dist/styles'))
     .pipe($.sourcemaps.write())
-    .pipe(gulp.dest('.tmp/styles'))
+    .pipe(gulp.dest(DEST_STYLES))
     .pipe(browserSync.stream())
     .pipe($.size({title: 'styles'}));
 });
@@ -123,8 +132,7 @@ gulp.task('templates:build', () => {
       layouts: 'app/layouts/',
       partials: 'app/components/'
     }))
-    .pipe(gulp.dest('.tmp'))
-    .pipe(gulp.dest('dist'))
+    .pipe(gulp.dest(DEST_ROOT))
     .on('finish', browserSync.reload);
 });
 
@@ -136,78 +144,76 @@ gulp.task('templates:refresh', (done) => {
 
 // Scan your HTML for assets & optimize them
 gulp.task('scripts', () => {
-  return rollup({
-    entry: 'app/assets/scripts/main.js',
-    format: 'iife',
-    // sourceMap: true,
+  return webpackStream({
+    entry: './app/assets/scripts/main.js',
+    output: {
+      filename: '[name].js',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.js$/,
+          exclude: /(node_modules|bower_components)/,
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            presets: [
+              ["es2015", {"modules": false }]
+            ]
+          }
+        }
+      ]
+    },
+
+    devtool: "source-map",
+
     plugins: [
-      babel({
-        presets: ["es2015-rollup"],
-        babelrc: false
-      }),
-      nodeResolve({
-        jsnext: true,
-        main: true,
-        browser: true, // Prefer browser-ready packages
-        extensions: ['.js', '.json']
-      }),
-      commonjs({
-        include: 'node_modules/**/*'
-      }),
-      uglify()
+      new webpack.optimize.UglifyJsPlugin({sourceMap: true})
     ]
-  })
-  // .pipe($.babel())
-  // .pipe($.if('*.js', $.uglify({preserveComments: 'license'})))
-  .pipe(gulp.dest('.tmp'))
-  // adicionar sourcemaps
-  .pipe(gulp.dest('dist'));
+  }, webpack)
+  .pipe(gulp.dest(DEST_SCRIPTS));
 });
 
 // Clean output directory
 gulp.task('clean', () => {
   $.cache.clearAll();
-  del(['.tmp', 'dist/*', '!dist/.git'], {dot: true});
+  return del([DEST_ROOT, `!${DEST_ROOT}/.git`], {dot: true});
 });
 
 // Watch files for changes & reload
-gulp.task('serve', ['clean'], () => {
-  runSequence(
-    'styles',
-    'templates:build',
-    // ['scripts'],
-    () => {
-      browserSync({
-        notify: false,
-        logPrefix: 'FESK',
-        // https: true,
-        server: ['.tmp', 'app', 'app/assets/', 'node_modules']
-      });
-    }
-  );
-
-
-  gulp.watch(['app/pages/**/*.{html,hbs}'], ['templates:build']);
-  gulp.watch(['app/{layouts,components}/**/*.{html,hbs}'], ['templates:refresh']);
-  gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
-  // gulp.watch(['app/assets/styles/**/*.{js}'], ['scripts']);
-});
-
-// Build and serve the output from the dist build
-gulp.task('serve:dist', ['default'], () => {
+gulp.task('serve', ['default'], () => {
   browserSync({
     notify: false,
     logPrefix: 'FESK',
+    server: [DEST_ROOT],
     // https: true,
-    server: 'dist'
-  });
+    // httpModule: "http2"
+  })
+
+  gulp.watch(['app/pages/**/*.{html,hbs}'], ['templates:build']);
+  gulp.watch(['app/{layouts,components}/**/*.{html}'], ['templates:refresh']);
+  gulp.watch(['app/assets/styles/**/*.{scss,css}'], ['styles']);
+  gulp.watch(['app/assets/scripts/**/*.{js}'], ['scripts']);
 });
 
+// // Build and serve the output from the dist build
+// gulp.task('serve:dist', ['default'], () => {
+//   browserSync({
+//     notify: false,
+//     logPrefix: 'FESK',
+//     server: 'dist',
+//     https: true,
+//     httpModule: "http2"
+//   });
+// });
+
 // Build production files, the default task
-gulp.task('default', ['clean'], () => {
-  runSequence(
+gulp.task('default', (cb) => {
+  return runSequence(
+    'clean',
     'styles',
     'templates:build',
-    [/*'scripts',*/ 'fonts', 'images', 'copy']
+    ['fonts', 'scripts', 'images', 'copy'],
+    cb
   );
 });
