@@ -2,12 +2,10 @@
 
 Framework front-end com workflow simplificado.
 
-**IE9+ ready.**
+## Requerimentos
 
-## Instalação
-
-É necessário já ter o *Node.js* 0.12.x (Versão suportada até o momento).
-Caso não tenha, baixe [aqui](https://nodejs.org/dist/v0.12.7/).
+- *Node.js* >= 4.3.0;
+- [Yarn](https://yarnpkg.com/);
 
 ## Como utilizar
 
@@ -15,29 +13,15 @@ Caso não tenha, baixe [aqui](https://nodejs.org/dist/v0.12.7/).
 
 2 - Acesse a pasta do projeto via terminal/cmd;
 
-3 - Instale as dependências do projeto utilizando `npm install`;
+3 - Instale as dependências do projeto utilizando `yarn`;
 
-4 - Utilize o comando `npm run server` para iniciar o servidor;
+4 - Utilize o comando `yarn dev` para iniciar o servidor;
 
 ## Comandos
-`npm start`
-ou
-`npm run server`
+`yarn dev`
 
 Inicia o servidor para desenvolvimento e aguarda por alterações no projeto;
 
-`npm run server:dist`
-
-Inicia servidor na pasta de distribuição;
-
-`npm run build`
+`yarn prod`
 
 Compila o app na pasta `dist` e deixando-o pronto para produção;
-
-`npm run build:styles`
-
-Compila somente o Sass para a pasta `dist`;
-
-`npm run build:images`
-
-Compila somente as imagens para a pasta `dist`;
